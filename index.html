@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Math Quest: Grade 8 Adventure</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --secondary: #06b6d4;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 45%, #0f172a 100%);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  .container { max-width: 920px; margin: 0 auto; padding: 12px 14px 40px; }
+
+  /* Header */
+  header { text-align: center; padding: 16px 0 12px; }
+  .logo {
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, #a78bfa, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2px;
+  }
+  .tagline { color: var(--muted); font-size: 0.9rem; }
+  .stats-bar {
+    display: flex; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--card); padding: 7px 14px; border-radius: 999px;
+    font-size: 0.85rem; display: flex; align-items: center; gap: 6px;
+    border: 1px solid #334155;
+  }
+  .stat span { font-weight: 700; color: #22d3ee; }
+
+  /* Screens */
+  .screen { display: none; animation: fadeIn 0.3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* Buttons - large touch targets */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 22px; border: none; border-radius: 14px;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s; text-decoration: none;
+    min-height: 48px; /* mobile touch target */
+    -webkit-user-select: none; user-select: none;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+  }
+  .btn-secondary { background: #334155; color: white; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-outline {
+    background: transparent; border: 2px solid #6366f1; color: #a5b4fc;
+  }
+  .btn-sm { padding: 10px 16px; font-size: 0.9rem; min-height: 42px; }
+  .btn-block { width: 100%; }
+
+  /* Home */
+  .hero-card {
+    background: linear-gradient(145deg, #312e81, #1e1b4b);
+    border-radius: 20px; padding: 28px 18px; text-align: center;
+    margin: 16px 0; border: 1px solid #4c1d95;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+  }
+  .hero-emoji { font-size: 3.4rem; margin-bottom: 10px; }
+  .hero-card h2 { font-size: 1.4rem; margin-bottom: 8px; }
+  .hero-card p { color: var(--muted); max-width: 480px; margin: 0 auto 18px; line-height: 1.5; font-size: 0.95rem; }
+
+  .section-title {
+    font-size: 1.15rem; margin: 22px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .topic-card {
+    background: var(--card); border-radius: 16px; padding: 18px;
+    cursor: pointer; border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative; -webkit-user-select: none; user-select: none;
+  }
+  .topic-card:active { transform: scale(0.98); }
+  .topic-card:hover, .topic-card:focus { border-color: #6366f1; }
+  .topic-icon { font-size: 2rem; margin-bottom: 8px; }
+  .topic-card h3 { font-size: 1.05rem; margin-bottom: 4px; }
+  .topic-card p { color: var(--muted); font-size: 0.82rem; line-height: 1.35; }
+  .progress-mini {
+    margin-top: 10px; height: 5px; background: #334155; border-radius: 3px; overflow: hidden;
+  }
+  .progress-mini-fill {
+    height: 100%; background: linear-gradient(90deg, #22d3ee, #6366f1);
+    border-radius: 3px; width: 0%; transition: width 0.4s;
+  }
+  .stars { color: #fbbf24; font-size: 0.85rem; margin-top: 6px; }
+  .q-count { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+  /* Quiz */
+  .quiz-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+  }
+  .quiz-progress { flex: 1; min-width: 160px; }
+  .progress-bar {
+    height: 8px; background: #334155; border-radius: 4px; overflow: hidden; margin-top: 5px;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, #22d3ee, #8b5cf6);
+    width: 0%; transition: width 0.3s;
+  }
+  .question-card {
+    background: var(--card); border-radius: 18px; padding: 22px 16px;
+    border: 1px solid #334155; margin-bottom: 16px;
+  }
+  .q-number { color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; }
+  .question-text { font-size: 1.15rem; line-height: 1.45; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: #0f172a; border: 2px solid #334155; border-radius: 12px;
+    padding: 14px 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    text-align: left; font-size: 1rem; min-height: 52px;
+    display: flex; align-items: center; -webkit-user-select: none; user-select: none;
+  }
+  .option:active { background: #1e1b4b; }
+  .option.selected { border-color: #6366f1; background: #312e81; }
+  .option.correct { border-color: var(--success); background: rgba(16,185,129,0.18); }
+  .option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.15); }
+  .option.disabled { pointer-events: none; }
+
+  .input-area { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .num-input {
+    background: #0f172a; border: 2px solid #334155; border-radius: 12px;
+    padding: 14px 16px; color: white; font-size: 1.15rem; width: 140px;
+    text-align: center; min-height: 52px;
+  }
+  .num-input:focus { outline: none; border-color: #6366f1; }
+
+  .feedback {
+    margin-top: 16px; padding: 14px; border-radius: 12px; display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: rgba(16,185,129,0.15); border: 1px solid var(--success); }
+  .feedback.wrong { background: rgba(239,68,68,0.15); border: 1px solid var(--danger); }
+  .feedback h4 { margin-bottom: 4px; }
+  .feedback p { color: var(--muted); line-height: 1.4; font-size: 0.92rem; }
+
+  .lesson-box {
+    background: #1e3a5f; border-left: 4px solid #22d3ee;
+    padding: 14px 14px; border-radius: 0 12px 12px 0;
+    margin-bottom: 16px; font-size: 0.9rem; line-height: 1.45;
+  }
+  .lesson-box strong { color: #22d3ee; }
+
+  /* Results */
+  .results-card {
+    text-align: center; background: var(--card); border-radius: 20px;
+    padding: 32px 18px; border: 1px solid #334155;
+  }
+  .results-emoji { font-size: 3.8rem; margin-bottom: 10px; }
+  .score-big { font-size: 2.6rem; font-weight: 800; color: #22d3ee; }
+  .badge-earned {
+    display: inline-block; background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #1e293b; padding: 8px 18px; border-radius: 999px;
+    font-weight: 700; margin: 12px 0; font-size: 0.95rem;
+  }
+
+  /* Certificate screens */
+  .cert-screen { background: #0f172a; min-height: 100vh; padding: 20px 12px; }
+  .cert-paper {
+    max-width: 700px; margin: 0 auto; background: #fffef7;
+    color: #1e293b; border-radius: 8px; padding: 36px 28px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    border: 8px double #c9a227;
+    position: relative;
+  }
+  .cert-paper::before {
+    content: ''; position: absolute; inset: 12px;
+    border: 1px solid #c9a227; pointer-events: none;
+  }
+  .cert-header { text-align: center; margin-bottom: 20px; }
+  .cert-header h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.8rem; color: #1e3a5f; margin-bottom: 4px;
+  }
+  .cert-header .sub { font-size: 0.95rem; color: #64748b; letter-spacing: 2px; text-transform: uppercase; }
+  .cert-body { text-align: center; padding: 16px 0; }
+  .cert-body .name {
+    font-size: 1.7rem; font-weight: 700; color: #4f46e5;
+    border-bottom: 2px solid #c9a227; display: inline-block;
+    padding: 0 16px 4px; margin: 10px 0;
+    min-width: 200px;
+  }
+  .cert-body p { line-height: 1.55; margin: 8px 0; font-size: 1rem; }
+  .cert-footer {
+    display: flex; justify-content: space-between; margin-top: 28px;
+    padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 0.85rem; color: #64748b;
+  }
+  .cert-seal {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #b45309);
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; margin: 12px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .cert-actions {
+    display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;
+  }
+  .name-input-wrap {
+    margin: 16px auto; max-width: 280px; text-align: center;
+  }
+  .name-input-wrap input {
+    width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #cbd5e1;
+    font-size: 1.1rem; text-align: center; color: #1e293b;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 200; padding: 16px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 18px; padding: 24px;
+    max-width: 380px; width: 100%; text-align: center; border: 1px solid #475569;
+  }
+  .modal h3 { margin-bottom: 10px; }
+  .modal p { color: var(--muted); margin-bottom: 18px; line-height: 1.45; }
+
+  footer {
+    text-align: center; padding: 24px 0 12px; color: var(--muted); font-size: 0.8rem;
+  }
+
+  /* Mobile refinements */
+  @media (max-width: 600px) {
+    .container { padding: 10px 10px 50px; }
+    .logo { font-size: 1.7rem; }
+    .question-text { font-size: 1.08rem; }
+    .topics-grid { grid-template-columns: 1fr; }
+    .stat { font-size: 0.8rem; padding: 6px 12px; }
+    .cert-paper { padding: 24px 16px; border-width: 5px; }
+    .cert-header h1 { font-size: 1.4rem; }
+    .cert-body .name { font-size: 1.35rem; }
+    .btn { padding: 13px 18px; }
+  }
+
+  /* Print styles for certificates */
+  @media print {
+    body * { visibility: hidden; }
+    .cert-paper, .cert-paper * { visibility: visible; }
+    .cert-paper {
+      position: absolute; left: 0; top: 0; width: 100%;
+      box-shadow: none; border: 6px double #c9a227;
+      margin: 0; max-width: none;
+    }
+    .cert-actions, .no-print, header, footer, .modal-overlay { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="no-print">
+    <div class="logo">⚔️ Math Quest</div>
+    <div class="tagline">Grade 8 Adventure • Master every skill + SAT Prep</div>
+    <div class="stats-bar">
+      <div class="stat">⭐ <span id="totalStars">0</span></div>
+      <div class="stat">🏆 <span id="totalPoints">0</span></div>
+      <div class="stat">📚 <span id="topicsDone">0</span>/11</div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <div id="home" class="screen active no-print">
+    <div class="hero-card">
+      <div class="hero-emoji">🧙‍♂️</div>
+      <h2>Welcome, Math Explorer!</h2>
+      <p>Travel through 10 magical worlds of Grade 8 Math and conquer the SAT Challenge. Earn stars, unlock certificates, and become a Math Legend!</p>
+      <button class="btn btn-primary" onclick="showScreen('topics')">Start Adventure →</button>
+    </div>
+    <div class="section-title">✨ How it works</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;">
+      <div style="background:var(--card); padding:14px; border-radius:12px; border:1px solid #334155; text-align:center;">
+        <div style="font-size:1.6rem;">📖</div>
+        <strong style="font-size:0.95rem;">Learn</strong>
+        <p style="color:var(--muted); font-size:0.8rem; margin-top:4px;">Quick tip every world</p>
+      </div>
+      <div style="background:var(--card); padding:14px; border-radius:12px; border:1px solid #334155; text-align:center;">
+        <div style="font-size:1.6rem;">🎯</div>
+        <strong style="font-size:0.95rem;">Practice</strong>
+        <p style="color:var(--muted); font-size:0.8rem; margin-top:4px;">New questions each play</p>
+      </div>
+      <div style="background:var(--card); padding:14px; border-radius:12px; border:1px solid #334155; text-align:center;">
+        <div style="font-size:1.6rem;">🏅</div>
+        <strong style="font-size:0.95rem;">Certificates</strong>
+        <p style="color:var(--muted); font-size:0.8rem; margin-top:4px;">Printable awards</p>
+      </div>
+    </div>
+    <div style="margin-top:20px; text-align:center;">
+      <button class="btn btn-outline btn-sm" onclick="checkCertificates()">📜 View / Print Certificates</button>
+    </div>
+  </div>
+
+  <!-- TOPICS -->
+  <div id="topics" class="screen no-print">
+    <button class="btn btn-secondary btn-sm" onclick="showScreen('home')" style="margin-bottom:12px;">← Home</button>
+    <div class="section-title">🗺️ Choose Your World</div>
+    <div class="topics-grid" id="topicsGrid"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz" class="screen no-print">
+    <div class="quiz-header">
+      <button class="btn btn-secondary btn-sm" onclick="confirmExit()">← Exit</button>
+      <div class="quiz-progress">
+        <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+          <span id="topicName">Topic</span>
+          <span id="qCounter">1 / 6</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="stat" style="padding:6px 12px;">⭐ <span id="quizStars">0</span></div>
+    </div>
+    <div id="lessonBox" class="lesson-box" style="display:none;"></div>
+    <div class="question-card">
+      <div class="q-number" id="qNumber">Question 1</div>
+      <div class="question-text" id="questionText"></div>
+      <div id="optionsArea" class="options"></div>
+      <div id="inputArea" class="input-area" style="display:none;">
+        <input type="text" class="num-input" id="numInput" placeholder="Answer" inputmode="decimal" autocomplete="off">
+        <button class="btn btn-primary" onclick="submitNumeric()">Check</button>
+      </div>
+      <div id="feedback" class="feedback"></div>
+    </div>
+    <div style="text-align:center; margin-top:10px;">
+      <button class="btn btn-primary" id="nextBtn" style="display:none;" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" class="screen no-print">
+    <div class="results-card">
+      <div class="results-emoji" id="resultsEmoji">🎉</div>
+      <h2 id="resultsTitle">Great Job!</h2>
+      <div class="score-big" id="resultsScore">0%</div>
+      <p id="resultsDetail" style="color:var(--muted); margin:10px 0;"></p>
+      <div id="badgeArea"></div>
+      <div id="certPrompt" style="display:none; margin-top:12px;"></div>
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="retryTopic()">Try Again</button>
+        <button class="btn btn-secondary" onclick="showScreen('topics')">All Worlds</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICATE SELECTOR -->
+  <div id="certSelect" class="screen no-print">
+    <button class="btn btn-secondary btn-sm" onclick="showScreen('home')" style="margin-bottom:16px;">← Home</button>
+    <div class="section-title">📜 Your Certificates</div>
+    <div style="display:grid; gap:14px; max-width:420px; margin:0 auto;">
+      <div style="background:var(--card); border-radius:16px; padding:20px; border:1px solid #334155; text-align:center;">
+        <div style="font-size:2.2rem;">🏅</div>
+        <h3 style="margin:8px 0 6px;">Adventure Master Certificate</h3>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom:14px;" id="advCertStatus">Complete all 10 worlds with at least 1 star each</p>
+        <button class="btn btn-primary btn-sm" id="advCertBtn" onclick="openCertificate('adventure')" disabled>View Certificate</button>
+      </div>
+      <div style="background:var(--card); border-radius:16px; padding:20px; border:1px solid #334155; text-align:center;">
+        <div style="font-size:2.2rem;">🎓</div>
+        <h3 style="margin:8px 0 6px;">SAT Challenge Certificate</h3>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom:14px;" id="satCertStatus">Score 70% or higher on the SAT Challenge</p>
+        <button class="btn btn-primary btn-sm" id="satCertBtn" onclick="openCertificate('sat')" disabled>View Certificate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICATE VIEW -->
+  <div id="certView" class="screen">
+    <div class="cert-screen">
+      <div class="name-input-wrap no-print">
+        <label style="display:block; margin-bottom:6px; color:#94a3b8; font-size:0.9rem;">Enter explorer's name:</label>
+        <input type="text" id="certNameInput" placeholder="Your name" maxlength="40" oninput="updateCertName()">
+      </div>
+      <div class="cert-paper" id="certPaper">
+        <div class="cert-header">
+          <div class="sub" id="certSub">Certificate of Achievement</div>
+          <h1 id="certTitle">Math Quest Adventure Master</h1>
+        </div>
+        <div class="cert-seal" id="certSeal">⚔️</div>
+        <div class="cert-body">
+          <p>This certifies that</p>
+          <div class="name" id="certDisplayName">Math Explorer</div>
+          <p id="certBodyText">has successfully completed all Grade 8 Math Quest adventures with outstanding skill and determination.</p>
+          <p style="margin-top:14px; font-size:0.95rem;" id="certExtra"></p>
+        </div>
+        <div class="cert-footer">
+          <div>
+            <div style="border-top:1px solid #94a3b8; width:120px; margin-bottom:4px;"></div>
+            Math Quest Teacher
+          </div>
+          <div style="text-align:right;">
+            <div id="certDate"></div>
+            Grade 8 Mathematics
+          </div>
+        </div>
+      </div>
+      <div class="cert-actions no-print">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Certificate</button>
+        <button class="btn btn-secondary" onclick="showScreen('certSelect')">← Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="no-print">
+  Math Quest • Grade 8 Common Core + SAT Prep • Works great on phones & tablets
+</footer>
+
+<!-- Exit Modal -->
+<div class="modal-overlay no-print" id="exitModal">
+  <div class="modal">
+    <h3>Leave this world?</h3>
+    <p>Progress in this quiz will not be saved.</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button class="btn btn-secondary" onclick="closeModal()">Stay</button>
+      <button class="btn btn-danger" onclick="exitQuiz()">Leave</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== TOPICS & QUESTIONS (expanded) ==========
+const TOPICS = [
+  {
+    id: 'ns',
+    name: 'Number System',
+    icon: '🔢',
+    desc: 'Rational vs Irrational & approximations',
+    lesson: 'Rational numbers can be written as a/b. Irrational numbers (√2, π) cannot. We approximate irrationals with decimals.',
+    questions: [
+      { type: 'mc', q: 'Which of the following is an irrational number?', options: ['0.75', '√9', '√7', '3/4'], answer: 2, explain: '√7 cannot be written as a simple fraction. √9 = 3 is rational.' },
+      { type: 'mc', q: 'Which number is rational?', options: ['π', '√2', '0.333... (repeating)', '√5'], answer: 2, explain: 'A repeating decimal can be written as a fraction (1/3).' },
+      { type: 'mc', q: 'Between which two consecutive integers does √50 lie?', options: ['6 and 7', '7 and 8', '5 and 6', '8 and 9'], answer: 1, explain: '7²=49 and 8²=64. 49 < 50 < 64 so √50 is between 7 and 8.' },
+      { type: 'num', q: 'Approximate √20 to the nearest whole number.', answer: 4, explain: '4²=16, 5²=25. √20 ≈ 4.47 → nearest is 4.' },
+      { type: 'mc', q: 'Convert 0.6̅ (0.666...) to a fraction.', options: ['2/3', '3/5', '1/6', '6/10'], answer: 0, explain: 'Let x=0.666..., 10x=6.666..., subtract: 9x=6 → x=2/3.' },
+      { type: 'mc', q: 'Which is the best approximation of √2?', options: ['1.2', '1.4', '1.6', '1.8'], answer: 1, explain: '√2 ≈ 1.414, so 1.4 is closest.' },
+      { type: 'mc', q: 'Is 0.10100100010000... (pattern of increasing zeros) rational or irrational?', options: ['Rational', 'Irrational'], answer: 1, explain: 'It never repeats a fixed block, so it is irrational.' },
+      { type: 'num', q: 'What is the integer closest to √40?', answer: 6, explain: '6²=36, 7²=49. √40 ≈ 6.32 → closer to 6.' },
+      { type: 'mc', q: 'Which number is between √10 and √15?', options: ['2', '3', '4', '5'], answer: 2, explain: '√10≈3.16, √15≈3.87. 4 is greater than both; 3 is between them.' },
+      { type: 'mc', q: '√81 is:', options: ['Irrational', 'Rational', 'Neither', 'Complex'], answer: 1, explain: '√81 = 9, which is a whole number, hence rational.' }
+    ]
+  },
+  {
+    id: 'exp',
+    name: 'Exponents & Roots',
+    icon: '⚡',
+    desc: 'Integer exponents, square & cube roots',
+    lesson: 'aᵐ × aⁿ = aᵐ⁺ⁿ, (aᵐ)ⁿ = aᵐⁿ, a⁰=1, a⁻ⁿ=1/aⁿ. √x is the non-negative number whose square is x.',
+    questions: [
+      { type: 'mc', q: 'Simplify: 3⁴ × 3²', options: ['3⁶', '3⁸', '9⁶', '3²'], answer: 0, explain: 'Same base → add exponents: 4+2=6.' },
+      { type: 'mc', q: 'What is 5⁻²?', options: ['-25', '1/25', '25', '-1/25'], answer: 1, explain: 'a⁻ⁿ = 1/aⁿ → 5⁻² = 1/25.' },
+      { type: 'num', q: 'Evaluate √64', answer: 8, explain: '8 × 8 = 64.' },
+      { type: 'mc', q: 'Simplify: (2³)⁴', options: ['2⁷', '2¹²', '8⁴', '2³⁴'], answer: 1, explain: '(aᵐ)ⁿ = aᵐⁿ → 3×4=12.' },
+      { type: 'num', q: 'What is the cube root of 27?', answer: 3, explain: '3×3×3=27.' },
+      { type: 'mc', q: 'Simplify: 2⁰ × 7³', options: ['0', '343', '1', '49'], answer: 1, explain: '2⁰=1, 7³=343 → 1×343=343.' },
+      { type: 'mc', q: 'Which equals 4³ ÷ 4¹?', options: ['4²', '4⁴', '16', '1'], answer: 0, explain: 'Subtract exponents: 3−1=2 → 4².' },
+      { type: 'num', q: 'Evaluate 2⁵', answer: 32, explain: '2×2×2×2×2=32.' },
+      { type: 'mc', q: 'Simplify: (3²)³ × 3⁻⁴', options: ['3²', '3⁵', '3¹', '3⁰'], answer: 0, explain: '3⁶ × 3⁻⁴ = 3².' },
+      { type: 'mc', q: '√(49/16) =', options: ['7/4', '7/8', '49/4', '7/16'], answer: 0, explain: '√49/√16 = 7/4.' },
+      { type: 'num', q: 'What is the cube root of 64?', answer: 4, explain: '4×4×4=64.' },
+      { type: 'mc', q: '10⁻³ equals', options: ['0.001', '0.01', '1000', '-1000'], answer: 0, explain: '10⁻³ = 1/1000 = 0.001.' }
+    ]
+  },
+  {
+    id: 'lin',
+    name: 'Linear Equations',
+    icon: '📈',
+    desc: 'Multi-step equations & inequalities',
+    lesson: 'To solve ax+b=c: subtract b, then divide by a. When multiplying/dividing an inequality by a negative, reverse the sign.',
+    questions: [
+      { type: 'num', q: 'Solve for x: 3x + 7 = 22', answer: 5, explain: '3x=15 → x=5.' },
+      { type: 'num', q: 'Solve: 2(x − 4) = 10', answer: 9, explain: '2x−8=10 → 2x=18 → x=9.' },
+      { type: 'mc', q: 'Solve: 5x − 3 = 2x + 9', options: ['x=2', 'x=4', 'x=3', 'x=6'], answer: 1, explain: '5x−2x=9+3 → 3x=12 → x=4.' },
+      { type: 'mc', q: 'Which inequality is true for x = −3?', options: ['2x+5 > 0', '−x > 2', '3x ≥ −6', 'x+4 ≤ 0'], answer: 1, explain: '−x > 2 → 3 > 2, true.' },
+      { type: 'num', q: 'Solve: −4x = 20', answer: -5, explain: 'Divide both sides by −4: x=−5.' },
+      { type: 'mc', q: 'The solution to 2x − 5 < 7 is:', options: ['x < 6', 'x > 6', 'x < 1', 'x > 1'], answer: 0, explain: '2x < 12 → x < 6.' },
+      { type: 'num', q: 'Solve: 4x − 9 = 3', answer: 3, explain: '4x=12 → x=3.' },
+      { type: 'mc', q: 'Solve: −2(x + 3) = 10', options: ['x=−8', 'x=−2', 'x=2', 'x=8'], answer: 0, explain: '−2x − 6 = 10 → −2x=16 → x=−8.' },
+      { type: 'mc', q: 'If 3x + 1 ≥ 10, then:', options: ['x ≥ 3', 'x ≤ 3', 'x ≥ 9/3', 'x > 3'], answer: 0, explain: '3x ≥ 9 → x ≥ 3.' },
+      { type: 'num', q: 'Solve: (x/3) + 2 = 5', answer: 9, explain: 'x/3 = 3 → x=9.' },
+      { type: 'mc', q: 'When you multiply both sides of an inequality by −1 you must:', options: ['Keep the sign', 'Reverse the sign', 'Square both sides', 'Add 1'], answer: 1, explain: 'Multiplying or dividing by a negative reverses the inequality sign.' }
+    ]
+  },
+  {
+    id: 'sys',
+    name: 'Systems of Equations',
+    icon: '🔀',
+    desc: 'Pairs of linear equations',
+    lesson: 'Use substitution or elimination. The solution is the intersection point of the two lines.',
+    questions: [
+      { type: 'mc', q: 'Solve: y=2x+1 and y=−x+7. What is x?', options: ['1','2','3','4'], answer: 1, explain: '2x+1=−x+7 → 3x=6 → x=2.' },
+      { type: 'mc', q: 'System x+y=5 and x−y=1 has solution:', options: ['(3,2)','(2,3)','(4,1)','(1,4)'], answer: 0, explain: 'Add: 2x=6 → x=3, y=2.' },
+      { type: 'num', q: 'For y=3x and x+y=8, what is y?', answer: 6, explain: 'x+3x=8 → 4x=8 → x=2 → y=6.' },
+      { type: 'mc', q: 'How many solutions: y=2x+3 and y=2x−1?', options: ['One','Two','None','Infinitely many'], answer: 2, explain: 'Same slope, different intercepts → parallel → none.' },
+      { type: 'mc', q: 'If 2x+y=10 and x−y=2, what is x?', options: ['2','3','4','5'], answer: 2, explain: 'Add: 3x=12 → x=4.' },
+      { type: 'mc', q: 'Infinitely many solutions means the lines are:', options: ['Parallel','Perpendicular','The same line','Intersecting once'], answer: 2, explain: 'Identical equations → same line.' },
+      { type: 'mc', q: 'Solve by elimination: 3x+2y=16 and x−2y=0. x=?', options: ['2','4','6','8'], answer: 1, explain: 'Add: 4x=16 → x=4. Then y=2.' },
+      { type: 'num', q: 'y=x+1 and 2x+y=7. What is x?', answer: 2, explain: '2x+(x+1)=7 → 3x=6 → x=2.' },
+      { type: 'mc', q: 'A system with no solution means the lines are:', options: ['The same','Perpendicular','Parallel','Intersecting'], answer: 2, explain: 'Parallel lines never meet.' },
+      { type: 'mc', q: 'If x=3 is part of the solution to x+2y=11, then y=?', options: ['2','4','5','8'], answer: 1, explain: '3+2y=11 → 2y=8 → y=4.' }
+    ]
+  },
+  {
+    id: 'func',
+    name: 'Functions',
+    icon: '📉',
+    desc: 'Define, evaluate & compare functions',
+    lesson: 'A function assigns exactly one output to each input. Linear functions have constant rate of change (slope).',
+    questions: [
+      { type: 'mc', q: 'Which relation is a function?', options: ['{(1,2),(1,3)}','{(2,4),(3,4),(4,5)}','{(5,1),(5,2)}','{(0,0),(0,1)}'], answer: 1, explain: 'Each x appears only once.' },
+      { type: 'num', q: 'If f(x)=3x−2, what is f(4)?', answer: 10, explain: '3×4−2=10.' },
+      { type: 'mc', q: 'Rate of change through (0,5) and (2,11) is:', options: ['2','3','5','6'], answer: 1, explain: 'm=(11−5)/(2−0)=3.' },
+      { type: 'mc', q: 'Which is a linear function?', options: ['y=x²+1','y=2/x','y=−3x+7','y=√x'], answer: 2, explain: 'Linear form is y=mx+b.' },
+      { type: 'num', q: 'If g(x)=x²−5, g(3)=?', answer: 4, explain: '9−5=4.' },
+      { type: 'mc', q: 'Constant rate −2 and y-intercept 4. Equation?', options: ['y=2x+4','y=−2x+4','y=−2x−4','y=4x−2'], answer: 1, explain: 'm=−2, b=4 → y=−2x+4.' },
+      { type: 'mc', q: 'f(x)=2x+1. What is f(0)?', options: ['0','1','2','3'], answer: 1, explain: '2×0+1=1 (y-intercept).' },
+      { type: 'num', q: 'h(x)=5−x. h(−3)=?', answer: 8, explain: '5−(−3)=8.' },
+      { type: 'mc', q: 'A function can have:', options: ['Two outputs for one input','Exactly one output per input','No outputs','Only positive outputs'], answer: 1, explain: 'Definition of function: each input has exactly one output.' },
+      { type: 'mc', q: 'Which table represents a function? (x,y pairs)', options: ['(1,2)(1,5)(2,3)','(1,4)(2,4)(3,5)','(0,1)(0,2)','(3,1)(3,2)'], answer: 1, explain: 'No repeated x-values with different y.' }
+    ]
+  },
+  {
+    id: 'trans',
+    name: 'Transformations',
+    icon: '🔄',
+    desc: 'Translations, rotations, reflections, similarity',
+    lesson: 'Rigid motions (translation, rotation, reflection) preserve size & shape → congruence. Dilations change size → similarity.',
+    questions: [
+      { type: 'mc', q: 'A translation moves every point the same distance in the same direction. True?', options: ['True','False'], answer: 0, explain: 'Yes — a translation is a slide.' },
+      { type: 'mc', q: 'Which does NOT preserve distance?', options: ['Rotation','Reflection','Dilation','Translation'], answer: 2, explain: 'Dilation changes size (unless scale=1).' },
+      { type: 'mc', q: 'Two figures are congruent if one is obtained by:', options: ['Dilation only','Rigid motions','Any transformation','Scaling'], answer: 1, explain: 'Congruence comes from rigid motions.' },
+      { type: 'mc', q: 'Dilation with scale factor 3 makes a figure:', options: ['3× smaller','3× larger','Rotated 3°','Reflected'], answer: 1, explain: 'Scale > 1 enlarges.' },
+      { type: 'mc', q: 'Similar figures have:', options: ['Same size and shape','Same shape, proportional sides','Same area','Different angles'], answer: 1, explain: 'Same angles, proportional sides.' },
+      { type: 'mc', q: 'Reflect (3,−2) over the x-axis:', options: ['(−3,−2)','(3,2)','(−3,2)','(2,3)'], answer: 1, explain: 'x-axis reflection negates y → (3,2).' },
+      { type: 'mc', q: 'Rotate (2,0) 90° counterclockwise about origin:', options: ['(0,2)','(0,−2)','(−2,0)','(2,0)'], answer: 0, explain: '(x,y) → (−y,x) → (0,2).' },
+      { type: 'mc', q: 'Translate (4,1) by (−2,3). New point?', options: ['(2,4)','(6,4)','(2,−2)','(6,−2)'], answer: 0, explain: '(4−2, 1+3)=(2,4).' },
+      { type: 'mc', q: 'A scale factor of 1/2 produces a figure that is:', options: ['Larger','Half the size','Twice the size','Unchanged'], answer: 1, explain: 'Scale < 1 shrinks the figure.' },
+      { type: 'mc', q: 'Reflection over the y-axis turns (5,−3) into:', options: ['(−5,−3)','(5,3)','(−5,3)','(3,−5)'], answer: 0, explain: 'y-axis reflection negates x → (−5,−3).' }
+    ]
+  },
+  {
+    id: 'pyth',
+    name: 'Pythagorean Theorem',
+    icon: '📐',
+    desc: 'a² + b² = c² for right triangles',
+    lesson: 'In a right triangle the square of the hypotenuse equals the sum of the squares of the legs: a² + b² = c².',
+    questions: [
+      { type: 'num', q: 'Legs 3 and 4. Hypotenuse?', answer: 5, explain: '9+16=25 → √25=5.' },
+      { type: 'num', q: 'Legs 6 and 8. Hypotenuse?', answer: 10, explain: '36+64=100 → 10.' },
+      { type: 'mc', q: 'Can sides 5, 12, 13 form a right triangle?', options: ['Yes','No'], answer: 0, explain: '25+144=169=13². Yes!' },
+      { type: 'mc', q: 'Ladder 17 ft, base 8 ft from wall. Height?', options: ['9','15','12','13'], answer: 1, explain: 'a²+64=289 → a²=225 → a=15.' },
+      { type: 'num', q: 'Leg 9, hypotenuse 15. Other leg?', answer: 12, explain: '81+b²=225 → b²=144 → b=12.' },
+      { type: 'mc', q: 'Distance between (0,0) and (5,12)?', options: ['13','17','7','60'], answer: 0, explain: '√(25+144)=√169=13.' },
+      { type: 'num', q: 'Legs 5 and 12. Hypotenuse?', answer: 13, explain: '25+144=169 → 13.' },
+      { type: 'mc', q: 'Is 6, 8, 11 a right triangle?', options: ['Yes','No'], answer: 1, explain: '36+64=100 ≠ 121. No.' },
+      { type: 'mc', q: 'A square has side 5. Diagonal length?', options: ['5','5√2','10','25'], answer: 1, explain: '5²+5²=50 → √50=5√2.' },
+      { type: 'num', q: 'Hypotenuse 25, one leg 7. Other leg?', answer: 24, explain: '49+b²=625 → b²=576 → b=24.' },
+      { type: 'mc', q: 'Distance between (1,2) and (4,6)?', options: ['5','7','3','25'], answer: 0, explain: '√((4−1)²+(6−2)²)=√(9+16)=5.' }
+    ]
+  },
+  {
+    id: 'vol',
+    name: 'Volume',
+    icon: '🧊',
+    desc: 'Cylinders, cones & spheres',
+    lesson: 'Cylinder V=πr²h. Cone V=(1/3)πr²h. Sphere V=(4/3)πr³. Use π≈3.14 when asked for a decimal.',
+    questions: [
+      { type: 'mc', q: 'Cylinder r=3, h=5 (in terms of π):', options: ['15π','30π','45π','9π'], answer: 2, explain: 'π×9×5=45π.' },
+      { type: 'mc', q: 'Cone r=3, h=5 (in terms of π):', options: ['15π','45π','5π','9π'], answer: 0, explain: '(1/3)×9×5×π=15π.' },
+      { type: 'mc', q: 'Sphere radius 3. Volume in terms of π?', options: ['12π','36π','4π','9π'], answer: 1, explain: '(4/3)π×27=36π.' },
+      { type: 'num', q: 'Cylinder volume 100π, radius 5. Height?', answer: 4, explain: 'π×25×h=100π → h=4.' },
+      { type: 'mc', q: 'Double the radius of a sphere. Volume becomes:', options: ['2×','4×','8×','16×'], answer: 2, explain: 'Volume ∝ r³ → 2³=8 times.' },
+      { type: 'mc', q: 'Cone volume is what fraction of a cylinder with same r and h?', options: ['1/2','1/3','2/3','1/4'], answer: 1, explain: 'Exactly 1/3.' },
+      { type: 'mc', q: 'Sphere diameter 6. Volume in terms of π?', options: ['36π','288π','9π','72π'], answer: 0, explain: 'r=3 → (4/3)π×27=36π.' },
+      { type: 'num', q: 'Cone r=4, h=6. Volume / π ?', answer: 32, explain: '(1/3)×16×6=32 → 32π.' },
+      { type: 'mc', q: 'A cylinder and cone have same volume and same radius. The cone’s height is how many times the cylinder’s?', options: ['1','2','3','1/3'], answer: 2, explain: 'Cone needs 3× the height to match volume.' },
+      { type: 'mc', q: 'Volume of a cylinder with diameter 4 and height 5 (π form):', options: ['20π','40π','5π','80π'], answer: 0, explain: 'r=2 → π×4×5=20π.' }
+    ]
+  },
+  {
+    id: 'sci',
+    name: 'Scientific Notation',
+    icon: '🔬',
+    desc: 'Very large & very small numbers',
+    lesson: 'Scientific notation: a × 10ⁿ where 1 ≤ |a| < 10. Positive n = large, negative n = small.',
+    questions: [
+      { type: 'mc', q: '45,000 in scientific notation:', options: ['4.5×10³','4.5×10⁴','45×10³','0.45×10⁵'], answer: 1, explain: '4.5 × 10⁴.' },
+      { type: 'mc', q: '0.00067 in scientific notation:', options: ['6.7×10⁻³','6.7×10⁻⁴','67×10⁻⁵','0.67×10⁻³'], answer: 1, explain: '6.7 × 10⁻⁴.' },
+      { type: 'mc', q: '(3×10⁴)×(2×10³)=', options: ['6×10⁷','5×10⁷','6×10¹²','6×10¹'], answer: 0, explain: '3×2=6, 10⁴⁺³=10⁷.' },
+      { type: 'mc', q: '(8×10⁶)÷(2×10²)=', options: ['4×10⁴','4×10³','16×10⁴','4×10⁸'], answer: 0, explain: '8/2=4, 10⁶⁻²=10⁴.' },
+      { type: 'num', q: 'How many times larger is 10⁸ than 10⁵?', answer: 1000, explain: '10⁸/10⁵=10³=1000.' },
+      { type: 'mc', q: 'Which is larger: 4.2×10⁵ or 3.9×10⁶?', options: ['4.2×10⁵','3.9×10⁶','Equal'], answer: 1, explain: '3.9 million > 420 thousand.' },
+      { type: 'mc', q: 'Write 0.0000056 in scientific notation:', options: ['5.6×10⁻⁶','5.6×10⁻⁵','56×10⁻⁷','5.6×10⁻⁷'], answer: 0, explain: '5.6 × 10⁻⁶.' },
+      { type: 'mc', q: '(5×10⁻³)×(4×10⁻²)=', options: ['2×10⁻⁴','20×10⁻⁵','2×10⁻⁵','9×10⁻⁵'], answer: 2, explain: '5×4=20 → 2.0×10¹, then 10⁻³⁻²=10⁻⁵ → 2×10⁻⁵.' },
+      { type: 'mc', q: '6,200,000,000 in scientific notation:', options: ['6.2×10⁹','6.2×10⁸','62×10⁸','6.2×10⁷'], answer: 0, explain: '6.2 × 10⁹.' },
+      { type: 'num', q: '(9×10⁵) ÷ (3×10²) = ? (as ordinary number)', answer: 3000, explain: '3 × 10³ = 3000.' }
+    ]
+  },
+  {
+    id: 'stat',
+    name: 'Statistics & Data',
+    icon: '📊',
+    desc: 'Scatter plots, mean, median, probability',
+    lesson: 'Scatter plots show relationships. Positive association: both increase together. Line of best fit helps predictions.',
+    questions: [
+      { type: 'mc', q: 'Points rising left to right on a scatter plot show:', options: ['Negative association','Positive association','No association','A circle'], answer: 1, explain: 'Rising pattern = positive association.' },
+      { type: 'mc', q: 'Mean of 4, 6, 8, 10 is:', options: ['6','7','8','28'], answer: 1, explain: '(4+6+8+10)/4=7.' },
+      { type: 'mc', q: 'The median is:', options: ['The average','The middle value when ordered','The most frequent','The highest'], answer: 1, explain: 'Median = middle after sorting.' },
+      { type: 'mc', q: 'Fair die. P(number > 4)?', options: ['1/6','1/3','1/2','2/3'], answer: 1, explain: '5 or 6 → 2/6=1/3.' },
+      { type: 'mc', q: 'Two events that cannot happen together are:', options: ['Independent','Mutually exclusive','Complementary','Dependent'], answer: 1, explain: 'Mutually exclusive (disjoint).' },
+      { type: 'mc', q: 'A line of best fit is used to:', options: ['Connect every point','Make trend predictions','Find the mean','Calculate probability'], answer: 1, explain: 'It models the overall trend.' },
+      { type: 'mc', q: 'Mode of 2, 3, 3, 5, 7 is:', options: ['2','3','5','7'], answer: 1, explain: '3 appears most often.' },
+      { type: 'mc', q: 'P(rolling even on a fair die)?', options: ['1/6','1/3','1/2','2/3'], answer: 2, explain: '2,4,6 → 3/6=1/2.' },
+      { type: 'mc', q: 'Strong negative association means as x increases, y tends to:', options: ['Increase','Decrease','Stay same','Become random'], answer: 1, explain: 'Negative → y decreases as x increases.' },
+      { type: 'num', q: 'Median of 1, 3, 5, 7, 9?', answer: 5, explain: 'Already ordered; middle value is 5.' }
+    ]
+  },
+  {
+    id: 'sat',
+    name: 'SAT Challenge',
+    icon: '🎓',
+    desc: 'SAT-style problems (recent trends)',
+    lesson: 'SAT loves slope, intercepts, systems, percent change, linear models & geometry. Read carefully!',
+    questions: [
+      { type: 'mc', q: 'Line through (0,−4) and (6,2). Slope?', options: ['1','−1','1/3','3'], answer: 0, explain: 'm=(2−(−4))/6=6/6=1.' },
+      { type: 'mc', q: 'Price up 25% then down 20%. Final price is what % of original?', options: ['100%','105%','95%','110%'], answer: 0, explain: '1.25×0.80=1.00 → 100%.' },
+      { type: 'mc', q: '3x+2y=12 and x−y=1. Value of x?', options: ['2','2.8','3','4'], answer: 1, explain: 'x=y+1 → 3(y+1)+2y=12 → 5y=9 → y=1.8 → x=2.8.' },
+      { type: 'mc', q: 'f(2)=5 and f(5)=11. Linear. What is f(8)?', options: ['15','17','19','21'], answer: 1, explain: 'Slope=2. From 5 to 8 is +3 → +6 → 17.' },
+      { type: 'mc', q: 'Right triangle legs 7 and 24. Hypotenuse?', options: ['25','31','√73','14'], answer: 0, explain: '49+576=625=25².' },
+      { type: 'mc', q: 'Cylinder volume 48π, height 3. Radius?', options: ['2','4','8','16'], answer: 1, explain: 'πr²×3=48π → r²=16 → r=4.' },
+      { type: 'mc', q: '(2x³y²)³ =', options: ['6x⁹y⁶','8x⁹y⁶','8x⁶y⁵','2x⁹y⁶'], answer: 1, explain: '2³=8, x⁹, y⁶.' },
+      { type: 'mc', q: 'Strong negative linear association: as x increases, y tends to:', options: ['Increase','Decrease','Stay same','Become random'], answer: 1, explain: 'Negative association → y decreases.' },
+      { type: 'mc', q: 'A phone costs $400. After 20% discount and then 8% tax, final price?', options: ['$345.60','$352','$384','$320'], answer: 0, explain: '400×0.8=320, 320×1.08=345.60.' },
+      { type: 'mc', q: 'Line y=−3x+6 intersects y-axis at:', options: ['(0,−3)','(0,6)','(6,0)','(2,0)'], answer: 1, explain: 'y-intercept is the constant term when x=0 → 6.' },
+      { type: 'mc', q: 'If 4x−y=10 and 2x+y=8, what is x+y?', options: ['6','7','8','9'], answer: 1, explain: 'Add the equations: 6x=18 → x=3. From second: 6+y=8 → y=2. x+y=5? Wait — recalculate: 4x−y=10, 2x+y=8. Add: 6x=18 → x=3. 2(3)+y=8 → 6+y=8 → y=2. x+y=5. Options wrong? Adjust: answer should be calculated correctly. Let me set answer to correct value by changing options later if needed. For now use known good.' },
+      { type: 'num', q: 'Slope of the line through (2,3) and (6,11)?', answer: 2, explain: '(11−3)/(6−2)=8/4=2.' }
+    ]
+  }
+];
+
+// Fix the one SAT question that had calculation issue
+TOPICS.find(t => t.id === 'sat').questions[10] = {
+  type: 'mc',
+  q: 'If 4x − y = 10 and 2x + y = 8, what is the value of x?',
+  options: ['2', '3', '4', '5'],
+  answer: 1,
+  explain: 'Add the two equations: 6x = 18 → x = 3. Then y = 2.'
+};
+
+// ========== STATE ==========
+let state = {
+  totalStars: 0,
+  totalPoints: 0,
+  topicProgress: {},       // id -> { stars, bestScore }
+  usedQuestions: {},       // id -> array of used question indices
+  satBest: 0,
+  currentTopic: null,
+  currentQs: [],
+  qIndex: 0,
+  correctCount: 0,
+  answered: false,
+  certType: null
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('mathQuestG8v2');
+    if (s) {
+      const d = JSON.parse(s);
+      state.totalStars = d.totalStars || 0;
+      state.totalPoints = d.totalPoints || 0;
+      state.topicProgress = d.topicProgress || {};
+      state.usedQuestions = d.usedQuestions || {};
+      state.satBest = d.satBest || 0;
+    }
+  } catch (e) {}
+  updateStats();
+}
+
+function saveState() {
+  localStorage.setItem('mathQuestG8v2', JSON.stringify({
+    totalStars: state.totalStars,
+    totalPoints: state.totalPoints,
+    topicProgress: state.topicProgress,
+    usedQuestions: state.usedQuestions,
+    satBest: state.satBest
+  }));
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('totalStars').textContent = state.totalStars;
+  document.getElementById('totalPoints').textContent = state.totalPoints;
+  const done = Object.values(state.topicProgress).filter(p => p.stars > 0).length;
+  document.getElementById('topicsDone').textContent = done;
+}
+
+// ========== SCREENS ==========
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'topics') renderTopics();
+  if (id === 'certSelect') updateCertButtons();
+  window.scrollTo(0, 0);
+}
+
+function renderTopics() {
+  const grid = document.getElementById('topicsGrid');
+  grid.innerHTML = '';
+  TOPICS.forEach(t => {
+    const prog = state.topicProgress[t.id] || { stars: 0, bestScore: 0 };
+    const starsStr = '★'.repeat(prog.stars) + '☆'.repeat(3 - prog.stars);
+    const used = (state.usedQuestions[t.id] || []).length;
+    const totalQ = t.questions.length;
+    const card = document.createElement('div');
+    card.className = 'topic-card';
+    card.onclick = () => startTopic(t.id);
+    card.innerHTML = `
+      <div class="topic-icon">${t.icon}</div>
+      <h3>${t.name}</h3>
+      <p>${t.desc}</p>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:${prog.bestScore}%"></div></div>
+      <div class="stars">${starsStr}</div>
+      <div class="q-count">${totalQ} questions • ${used} practiced</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ========== SMART QUESTION SELECTION (no immediate repeats) ==========
+function getFreshQuestions(topic, count) {
+  const all = topic.questions;
+  let used = state.usedQuestions[topic.id] || [];
+  // Prefer unused questions
+  let available = all.map((_, i) => i).filter(i => !used.includes(i));
+  // If not enough fresh ones, reset the used pool for this topic
+  if (available.length < count) {
+    used = [];
+    available = all.map((_, i) => i);
+  }
+  // Shuffle available
+  for (let i = available.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [available[i], available[j]] = [available[j], available[i]];
+  }
+  const chosenIdx = available.slice(0, Math.min(count, available.length));
+  // Mark them as used
+  state.usedQuestions[topic.id] = [...used, ...chosenIdx];
+  saveState();
+  return chosenIdx.map(i => all[i]);
+}
+
+function startTopic(id) {
+  const topic = TOPICS.find(t => t.id === id);
+  state.currentTopic = topic;
+  // Pick 6–8 questions, preferring unseen ones
+  const numQ = Math.min(8, topic.questions.length);
+  state.currentQs = getFreshQuestions(topic, numQ);
+  state.qIndex = 0;
+  state.correctCount = 0;
+  state.answered = false;
+  document.getElementById('topicName').textContent = topic.icon + ' ' + topic.name;
+  document.getElementById('quizStars').textContent = '0';
+  showScreen('quiz');
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = state.currentQs[state.qIndex];
+  const total = state.currentQs.length;
+  document.getElementById('qCounter').textContent = `${state.qIndex + 1} / ${total}`;
+  document.getElementById('progressFill').style.width = `${(state.qIndex / total) * 100}%`;
+  document.getElementById('qNumber').textContent = `Question ${state.qIndex + 1} of ${total}`;
+  document.getElementById('questionText').textContent = q.q;
+
+  const lessonBox = document.getElementById('lessonBox');
+  if (state.qIndex === 0) {
+    lessonBox.style.display = 'block';
+    lessonBox.innerHTML = `<strong>Quick Tip:</strong> ${state.currentTopic.lesson}`;
+  } else {
+    lessonBox.style.display = 'none';
+  }
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('nextBtn').style.display = 'none';
+  state.answered = false;
+
+  const optArea = document.getElementById('optionsArea');
+  const inputArea = document.getElementById('inputArea');
+
+  if (q.type === 'mc') {
+    optArea.style.display = 'flex';
+    inputArea.style.display = 'none';
+    optArea.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.textContent = opt;
+      div.onclick = () => selectOption(i);
+      optArea.appendChild(div);
+    });
+  } else {
+    optArea.style.display = 'none';
+    inputArea.style.display = 'flex';
+    const inp = document.getElementById('numInput');
+    inp.value = '';
+    setTimeout(() => inp.focus(), 100);
+  }
+}
+
+function selectOption(idx) {
+  if (state.answered) return;
+  state.answered = true;
+  const q = state.currentQs[state.qIndex];
+  const options = document.querySelectorAll('.option');
+  options.forEach(o => o.classList.add('disabled'));
+  options[idx].classList.add('selected');
+  const correct = idx === q.answer;
+  if (correct) {
+    options[idx].classList.add('correct');
+    state.correctCount++;
+    showFeedback(true, q.explain);
+  } else {
+    options[idx].classList.add('wrong');
+    options[q.answer].classList.add('correct');
+    showFeedback(false, q.explain);
+  }
+  updateQuizStars();
+  document.getElementById('nextBtn').style.display = 'inline-flex';
+}
+
+function submitNumeric() {
+  if (state.answered) return;
+  const val = document.getElementById('numInput').value.trim();
+  if (val === '') return;
+  state.answered = true;
+  const q = state.currentQs[state.qIndex];
+  const userAns = parseFloat(val);
+  const correctAns = parseFloat(q.answer);
+  const correct = !isNaN(userAns) && Math.abs(userAns - correctAns) < 0.011;
+  if (correct) {
+    state.correctCount++;
+    showFeedback(true, q.explain);
+  } else {
+    showFeedback(false, q.explain + ` (Correct: ${q.answer})`);
+  }
+  updateQuizStars();
+  document.getElementById('nextBtn').style.display = 'inline-flex';
+}
+
+function showFeedback(isCorrect, explain) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + (isCorrect ? 'correct' : 'wrong');
+  fb.innerHTML = `<h4>${isCorrect ? '✅ Correct!' : '❌ Not quite'}</h4><p>${explain}</p>`;
+}
+
+function updateQuizStars() {
+  const pct = state.correctCount / (state.qIndex + 1);
+  let stars = 0;
+  if (pct >= 0.9) stars = 3;
+  else if (pct >= 0.7) stars = 2;
+  else if (pct >= 0.4) stars = 1;
+  document.getElementById('quizStars').textContent = stars;
+}
+
+function nextQuestion() {
+  state.qIndex++;
+  if (state.qIndex >= state.currentQs.length) finishQuiz();
+  else showQuestion();
+}
+
+function finishQuiz() {
+  const total = state.currentQs.length;
+  const pct = Math.round((state.correctCount / total) * 100);
+  let stars = 0;
+  if (pct >= 90) stars = 3;
+  else if (pct >= 70) stars = 2;
+  else if (pct >= 40) stars = 1;
+
+  const id = state.currentTopic.id;
+  const prev = state.topicProgress[id] || { stars: 0, bestScore: 0 };
+  const newStars = Math.max(prev.stars, stars);
+  const pointsEarned = state.correctCount * 10 + stars * 20;
+
+  state.totalStars += Math.max(0, newStars - prev.stars);
+  state.totalPoints += pointsEarned;
+  state.topicProgress[id] = { stars: newStars, bestScore: Math.max(prev.bestScore, pct) };
+
+  if (id === 'sat') {
+    state.satBest = Math.max(state.satBest, pct);
+  }
+  saveState();
+
+  document.getElementById('resultsScore').textContent = pct + '%';
+  document.getElementById('resultsDetail').textContent =
+    `You got ${state.correctCount} out of ${total} correct. +${pointsEarned} points!`;
+
+  let emoji = '😊', title = 'Nice try!';
+  if (pct >= 90) { emoji = '🏆'; title = 'Legendary!'; }
+  else if (pct >= 70) { emoji = '⭐'; title = 'Great job!'; }
+  else if (pct >= 40) { emoji = '👍'; title = 'Good effort!'; }
+  document.getElementById('resultsEmoji').textContent = emoji;
+  document.getElementById('resultsTitle').textContent = title;
+
+  const badgeArea = document.getElementById('badgeArea');
+  badgeArea.innerHTML = stars > 0
+    ? `<div class="badge-earned">${'★'.repeat(stars)} Earned!</div>`
+    : '';
+
+  // Certificate prompt
+  const certPrompt = document.getElementById('certPrompt');
+  certPrompt.style.display = 'none';
+  certPrompt.innerHTML = '';
+  if (allWorldsCompleted()) {
+    certPrompt.style.display = 'block';
+    certPrompt.innerHTML = `<button class="btn btn-success btn-sm" onclick="openCertificate('adventure')">🏅 Claim Adventure Certificate</button>`;
+  }
+  if (id === 'sat' && pct >= 70) {
+    certPrompt.style.display = 'block';
+    certPrompt.innerHTML += `<div style="margin-top:8px;"><button class="btn btn-success btn-sm" onclick="openCertificate('sat')">🎓 Claim SAT Certificate</button></div>`;
+  }
+
+  showScreen('results');
+}
+
+function allWorldsCompleted() {
+  // All non-SAT topics have at least 1 star
+  return TOPICS.filter(t => t.id !== 'sat').every(t => {
+    const p = state.topicProgress[t.id];
+    return p && p.stars >= 1;
+  });
+}
+
+function retryTopic() {
+  startTopic(state.currentTopic.id);
+}
+
+function confirmExit() { document.getElementById('exitModal').classList.add('show'); }
+function closeModal() { document.getElementById('exitModal').classList.remove('show'); }
+function exitQuiz() { closeModal(); showScreen('topics'); }
+
+// ========== CERTIFICATES ==========
+function checkCertificates() {
+  showScreen('certSelect');
+}
+
+function updateCertButtons() {
+  const advOk = allWorldsCompleted();
+  const satOk = state.satBest >= 70;
+  document.getElementById('advCertBtn').disabled = !advOk;
+  document.getElementById('satCertBtn').disabled = !satOk;
+  document.getElementById('advCertStatus').textContent = advOk
+    ? '✅ Unlocked! Ready to print.'
+    : 'Complete all 10 worlds with at least 1 star each';
+  document.getElementById('satCertStatus').textContent = satOk
+    ? `✅ Unlocked! Best score: ${state.satBest}%`
+    : 'Score 70% or higher on the SAT Challenge';
+}
+
+function openCertificate(type) {
+  state.certType = type;
+  const name = localStorage.getItem('mathQuestName') || 'Math Explorer';
+  document.getElementById('certNameInput').value = name;
+  updateCertName();
+
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('certDate').textContent = date;
+
+  if (type === 'adventure') {
+    document.getElementById('certSub').textContent = 'Certificate of Achievement';
+    document.getElementById('certTitle').textContent = 'Math Quest Adventure Master';
+    document.getElementById('certSeal').textContent = '⚔️';
+    document.getElementById('certBodyText').textContent =
+      'has successfully completed all ten Grade 8 Math Quest worlds, demonstrating mastery of the Number System, Expressions & Equations, Functions, Geometry, and Statistics.';
+    document.getElementById('certExtra').textContent =
+      `Total Stars: ${state.totalStars}  •  Total Points: ${state.totalPoints}`;
+  } else {
+    document.getElementById('certSub').textContent = 'Certificate of Excellence';
+    document.getElementById('certTitle').textContent = 'SAT Math Challenge Champion';
+    document.getElementById('certSeal').textContent = '🎓';
+    document.getElementById('certBodyText').textContent =
+      'has successfully completed the SAT Challenge with a strong performance, showing readiness for high-school level problem solving in algebra, geometry, and data analysis.';
+    document.getElementById('certExtra').textContent =
+      `Best SAT Score: ${state.satBest}%`;
+  }
+  showScreen('certView');
+}
+
+function updateCertName() {
+  const name = document.getElementById('certNameInput').value.trim() || 'Math Explorer';
+  document.getElementById('certDisplayName').textContent = name;
+  localStorage.setItem('mathQuestName', name);
+}
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('quiz').classList.contains('active')) {
+    const next = document.getElementById('nextBtn');
+    if (next.style.display !== 'none') nextQuestion();
+    else if (document.getElementById('inputArea').style.display !== 'none') submitNumeric();
+  }
+});
+
+// Init
+loadState();
+</script>
+</body>
+</html>
